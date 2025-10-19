@@ -27,8 +27,11 @@ const auth = (...roles: Role[]) => {
             if (!isUserExist) {
                 throw new AppError("Account not found !", 404)
             }
-            if (isUserExist?.status == "BLOCK") {
-                throw new AppError("This Account is blocked !", 401)
+            if (isUserExist?.accountStatus == "SUSPENDED") {
+                throw new AppError("This Account is suspended !", 401)
+            }
+            if (isUserExist?.accountStatus == "INACTIVE") {
+                throw new AppError("This Account is inactive !", 401)
             }
             if (isUserExist?.isDeleted) {
                 throw new AppError("This account is deleted", 401)
