@@ -9,13 +9,14 @@ export const swaggerOptions = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "API Doc - Team Virevo",
-            version: "1.0.0",
+            title: "API Doc - Build with Express CLI",
+            version: "1.0.0-Mahid",
             description: "Express API with auto-generated Swagger docs",
         },
         paths: {
             ...authSwaggerDocs,
-            ...userSwaggerDocs,},
+            ...userSwaggerDocs,
+        },
         servers: configs.env === "production" ? [
             { url: "https://live-url.com" },
             { url: "http://localhost:5000" },
