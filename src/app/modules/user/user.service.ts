@@ -1,13 +1,20 @@
+import { generateUniqueInvitationCode } from "../../utils/genarateInvitationCode";
 import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
-import { sendSMS } from "../../utils/sms";
-
-export const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000); // 6 digit
-};
 
 const createUser = async (payload: Partial<TUser>) => {
+  const superiorUser = await User_Model.findOne({
+    invitationCode: payload.invitationCode,
+  });
+  console.log("superior user id ", superiorUser?._id);
+
+  const superiorUserId = superiorUser?._id;
+  const superiorUserName = superiorUser?.name;
+
+  payload.superiorUserId = superiorUserId as unknown as string;
+  payload.superiorUserName = superiorUserName as string;
+
   const ieExists = await User_Model.findOne({ email: payload.email });
 
   if (payload.password) {
@@ -24,7 +31,11 @@ const createUser = async (payload: Partial<TUser>) => {
     payload.password = hashedPassword;
   }
 
-  return await User_Model.create(payload);
+  const invitationCode = await generateUniqueInvitationCode();
+  payload.invitationCode = invitationCode;
+
+  const user = new User_Model(payload);
+  return await user.save();
 };
 
 const getAllUsers = async () => {
@@ -32,6 +43,7 @@ const getAllUsers = async () => {
 };
 
 const getUserByUserId = async (userId: string) => {
+  console.log("userid ", userId);
   return await User_Model.findOne({ _id: userId });
 };
 
@@ -44,6 +56,13 @@ const updateUser = async (id: string, payload: Partial<TUser>) => {
 const deleteUser = async (id: string) => {
   return await User_Model.findByIdAndDelete(id);
 };
+const freezeUser = async (id: string, isFreeze: boolean) => {
+  return await User_Model.findByIdAndUpdate(
+    id,
+    { freezeUser: isFreeze },
+    { new: true }
+  );
+};
 
 export const user_services = {
   createUser,
@@ -52,4 +71,5 @@ export const user_services = {
   getUserByUserId,
   updateUser,
   deleteUser,
+  freezeUser,
 };

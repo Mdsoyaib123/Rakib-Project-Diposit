@@ -3,18 +3,24 @@ import { TUser } from "./user.interface";
 
 const userSchema = new Schema<TUser>(
   {
+    name: { type: String,  },
     phoneNumber: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    invitationCode: { type: String, required: true },
+    invitationCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    superiorUserId: { type: String },
+    superiorUserName: { type: String },
     userId: {
       type: Number,
       unique: true,
       default: () => Math.floor(1000000 + Math.random() * 9000000),
     },
+    freezeUser: { type: Boolean, default: false },
 
-    superiorUserId: { type: String },
-    superiorUserName: { type: String },
     userLavel: { type: String },
 
     quantityOfOrders: { type: Number, default: 0 },
