@@ -12,13 +12,13 @@ authRoute.post(
   auth_controllers.login_user
 );
 
-authRoute.get("/me", auth("ADMIN", "USER"), auth_controllers.get_my_profile);
+authRoute.get("/me", auth("admin", "user"), auth_controllers.get_my_profile);
 
 authRoute.post("/refresh-token", auth_controllers.refresh_token);
 
 authRoute.post(
   "/change-password",
-  auth("ADMIN", "USER"),
+  auth("admin", "user"),
   RequestValidator(auth_validation.changePassword),
   auth_controllers.change_password
 );

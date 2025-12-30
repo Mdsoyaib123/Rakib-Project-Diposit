@@ -22,8 +22,6 @@ const login_user_from_db = async (payload: TLoginPayload) => {
     isExistAccount.password
   );
 
-  console.log("is account exit", isExistAccount);
-  console.log("is password match ", isPasswordMatch);
   if (!isPasswordMatch) {
     throw new AppError("Invalid password", httpStatus.UNAUTHORIZED);
   }
@@ -36,7 +34,7 @@ const login_user_from_db = async (payload: TLoginPayload) => {
     configs.jwt.access_token_expires as string
   );
 
-//   console.log("accessToken", accessToken);
+  //   console.log("accessToken", accessToken);
 
   const refreshToken = jwtHelpers.generateToken(
     {
@@ -50,18 +48,16 @@ const login_user_from_db = async (payload: TLoginPayload) => {
     accessToken: accessToken,
     refreshToken: refreshToken,
     role: isExistAccount.role,
-    userId : isExistAccount._id,
+    userId: isExistAccount._id,
   };
 };
 
 const get_my_profile_from_db = async (email: string) => {
-  const isExistAccount = await isAccountExist(email);
   const accountProfile = await User_Model.findOne({
-    accountId: isExistAccount._id,
+    email: email,
   });
-  isExistAccount.password = "";
+
   return {
-    account: isExistAccount,
     profile: accountProfile,
   };
 };
@@ -77,10 +73,8 @@ const refresh_token_from_db = async (token: string) => {
     throw new Error("You are not authorized!");
   }
 
-  const userData = await Account_Model.findOne({
+  const userData = await User_Model.findOne({
     email: decodedData.email,
-    status: "ACTIVE",
-    isDeleted: false,
   });
 
   const accessToken = jwtHelpers.generateToken(
@@ -92,7 +86,7 @@ const refresh_token_from_db = async (token: string) => {
     configs.jwt.access_token_expires as string
   );
 
-  return accessToken;
+  return { accessToken };
 };
 
 const change_password_from_db = async (
@@ -102,23 +96,24 @@ const change_password_from_db = async (
     newPassword: string;
   }
 ) => {
-  const isExistAccount = await isAccountExist(user?.email);
+  const isExistAccount = await User_Model.findOne({ email: user.email });
+  if (!isExistAccount) {
+    throw new AppError("Account not found", httpStatus.NOT_FOUND);
+  }
 
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.oldPassword,
     isExistAccount.password
   );
-
   if (!isCorrectPassword) {
     throw new AppError("Old password is incorrect", httpStatus.UNAUTHORIZED);
   }
 
   const hashedPassword: string = await bcrypt.hash(payload.newPassword, 10);
-  await Account_Model.findOneAndUpdate(
+  await User_Model.findOneAndUpdate(
     { email: isExistAccount.email },
     {
       password: hashedPassword,
-      lastPasswordChange: Date(),
     }
   );
   return "Password changed successful.";
