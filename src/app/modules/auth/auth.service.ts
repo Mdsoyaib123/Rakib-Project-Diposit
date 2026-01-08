@@ -10,13 +10,24 @@ import { configs } from "../../configs";
 import { JwtPayload, Secret } from "jsonwebtoken";
 import sendMail from "../../utils/mail_sender";
 
-const login_user_from_db = async (payload: TLoginPayload) => {
-
-  const isExistAccount = await User_Model.findOne({ phoneNumber: payload.phoneNumber });
+const login_user_from_db = async (
+  payload: TLoginPayload,
+  ipAddress: string
+) => {
+  const isExistAccount = await User_Model.findOne({
+    phoneNumber: payload.phoneNumber,
+  });
   // console.log("is account", isExistAccount);
   if (!isExistAccount) {
     throw new AppError("Account does not exist", httpStatus.NOT_FOUND);
   }
+  console.log("ip address 444", ipAddress);
+
+  await User_Model.findOneAndUpdate(
+    { phoneNumber: payload.phoneNumber },
+    { lastLoginIp: ipAddress, lastLoginAt: new Date() }
+  );
+
   const isPasswordMatch = await bcrypt.compare(
     payload.password,
     isExistAccount.password
@@ -97,7 +108,9 @@ const change_password_from_db = async (
     newPassword: string;
   }
 ) => {
-  const isExistAccount = await User_Model.findOne({ phoneNumber: user.phoneNumber });
+  const isExistAccount = await User_Model.findOne({
+    phoneNumber: user.phoneNumber,
+  });
   if (!isExistAccount) {
     throw new AppError("Account not found", httpStatus.NOT_FOUND);
   }

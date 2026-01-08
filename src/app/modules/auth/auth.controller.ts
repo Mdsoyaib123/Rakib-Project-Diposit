@@ -5,14 +5,16 @@ import { auth_services } from "./auth.service";
 import httpStatus from "http-status";
 
 const login_user = catchAsync(async (req, res) => {
-  const result = await auth_services.login_user_from_db(req.body);
-
   const ipAddress =
     (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
     req.socket.remoteAddress ||
     req.ip;
 
-  console.log("ip addredss", ipAddress);
+  // console.log("ip addredss", ipAddress);
+  const result = await auth_services.login_user_from_db(
+    req.body,
+    ipAddress as string
+  );
 
   res.cookie("refreshToken", result.refreshToken, {
     secure: configs.env == "production",
