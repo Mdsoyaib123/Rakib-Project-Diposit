@@ -3,10 +3,11 @@ import { ProductService } from "./product.service";
 
 const createProduct = async (req: Request, res: Response) => {
   try {
-    // console.log("poster image ", req.file);
+    const posterImage = req?.file?.path;
+    // console.log("poster image ", posterImage);
     const payload = {
       ...req.body,
-      poster: req?.file?.path || "",
+      poster: posterImage || "",
     };
 
     const result = await ProductService.createProduct(payload);
@@ -24,17 +25,46 @@ const createProduct = async (req: Request, res: Response) => {
     });
   }
 };
+const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const productId = req.params.productId as unknown as number;
 
-const getAllProducts = async (_req: Request, res: Response) => {
-  const result = await ProductService.getAllProducts();
+    const posterImage = req?.file?.path;
+
+    const payload = {
+      ...req.body,
+      ...(posterImage && { poster: posterImage }),
+    };
+
+    const result = await ProductService.updateProduct(productId, payload);
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to update product",
+    });
+  }
+};
+
+const getAllProducts = async (req: Request, res: Response) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  const result = await ProductService.getAllProducts(page, limit);
 
   res.status(200).json({
     success: true,
-    data: result,
+    data: result.data,
   });
 };
 
 export const ProductController = {
   createProduct,
+  updateProduct,
   getAllProducts,
 };

@@ -1,5 +1,6 @@
-
 export interface TProduct {
+  productId: number;
+  status: "Active" | "Inactive";
   name: string;
   price: number;
   commission: number; // percentage

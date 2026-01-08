@@ -1,6 +1,5 @@
 import express from "express";
 import { ProductController } from "./product.controller";
-import multer from "multer";
 import { createUploader } from "../../utils/cloudinary";
 
 const router = express.Router();
@@ -12,7 +11,12 @@ router.post(
   upload.single("poster"),
   ProductController.createProduct
 );
+router.patch(
+  "/update-product/:productId",
+  upload.single("poster"),
+  ProductController.updateProduct
+);
 
-router.get("/", ProductController.getAllProducts);
+router.get("/getAllProduct", ProductController.getAllProducts);
 
 export const ProductRoutes = router;
