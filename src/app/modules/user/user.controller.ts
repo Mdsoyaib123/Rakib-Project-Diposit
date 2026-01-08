@@ -10,12 +10,27 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
-const getAllUsers = async (_req: Request, res: Response) => {
+const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await user_services.getAllUsers();
-    res.json({ success: true, data: users });
+    const result = await user_services.getAllUsers({
+      page: Number(req.query.page),
+      limit: Number(req.query.limit),
+      userId: req.query.userId as any,
+      ip: req.query.ip as string,
+      phoneLast4: req.query.phoneLast4 as string,
+      name: req.query.name as string,
+      userType: req.query.userType as string,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+    });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -93,7 +108,6 @@ const decreaseUserBalance = async (req: Request, res: Response) => {
   }
 };
 
-
 export const user_controllers = {
   createUser,
   getAllUsers,
@@ -102,5 +116,5 @@ export const user_controllers = {
   deleteUser,
   freezeUser,
   rechargeUserBalance,
-  decreaseUserBalance
+  decreaseUserBalance,
 };

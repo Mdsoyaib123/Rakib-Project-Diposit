@@ -7,18 +7,25 @@ const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
     invitationCode: payload.invitationCode,
   });
-  console.log("superior user id ", superiorUser?._id);
 
-  const superiorUserId = superiorUser?._id;
+  console.log("superior user id ", superiorUser?.userId);
+
+  if (!superiorUser) {
+    throw new Error("Superior user not found");
+  }
+
+  const superiorUserId = superiorUser?.userId;
   const superiorUserName = superiorUser?.name;
 
   payload.superiorUserId = superiorUserId as unknown as string;
   payload.superiorUserName = superiorUserName as string;
 
-  const ieExists = await User_Model.findOne({ email: payload.email });
+  const ieExists = await User_Model.findOne({
+    phoneNumber: payload.phoneNumber,
+  });
 
   if (ieExists) {
-    throw new Error("Email already exists");
+    throw new Error("Phone number already exists");
   }
 
   if (payload?.password) {
@@ -26,20 +33,65 @@ const createUser = async (payload: Partial<TUser>) => {
     payload.password = hashedPassword;
   }
 
-
   const invitationCode = await generateUniqueInvitationCode();
   payload.invitationCode = invitationCode;
 
   const user = new User_Model(payload);
 
-  console.log('user', user)
+  console.log("user", user);
   return await user.save();
 };
 
-const getAllUsers = async () => {
-  return await User_Model.find().sort({ createdAt: -1 });
-};
+const getAllUsers = async (query: any) => {
+  const {
+    page = 1,
+    limit = 10,
+    userId,
+    ip,
+    phoneLast4,
+    name,
+    userType,
+  } = query;
 
+  const filter: any = {};
+
+  // 🔍 User ID
+  if (userId) {
+    filter.userId = Number(userId);
+  }
+
+  // 🔍 IP Address
+  if (ip) {
+    filter.lastLoginIp = ip;
+  }
+
+  // 🔍 Phone last 4 digits
+  if (phoneLast4) {
+    filter.phoneNumber = { $regex: `${phoneLast4}$` };
+  }
+
+  // 🔍 Name (partial match)
+  if (name) {
+    filter.name = { $regex: name, $options: "i" };
+  }
+
+  // 🔍 User Type
+  if (userType) {
+    filter.userType = userType;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    User_Model.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+
+    User_Model.countDocuments(filter),
+  ]);
+
+  return {
+    data,
+  };
+};
 const getUserByUserId = async (userId: string) => {
   console.log("userid ", userId);
   return await User_Model.findOne({ _id: userId });
@@ -96,5 +148,5 @@ export const user_services = {
   deleteUser,
   freezeUser,
   rechargeUserBalance,
-  decreaseUserBalance
+  decreaseUserBalance,
 };
