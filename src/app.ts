@@ -16,7 +16,13 @@ const app = express();
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://dainty-semifreddo-2cf1f0.netlify.app",
+      "https://rainbow-sopapillas-9e5e0e.netlify.app",
+      "*",
+    ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     credentials: true,
   })
