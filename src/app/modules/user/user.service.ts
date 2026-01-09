@@ -273,7 +273,7 @@ const purchaseOrder = async (userId: number) => {
     $inc: {
       quantityOfOrders: -1,
       completedOrdersCount: 1,
-      userBalance: -product.salePrice,
+      userBalance: -product.price,
     },
   };
 
