@@ -28,13 +28,14 @@ router.patch(
   "/update-admin-assigned-product/:userId",
   user_controllers.updateAdminAssaignProduct
 );
-router.get(
-  "/purchase-order/:userId",
-  user_controllers.purchaseOrder
-);
+router.get("/purchase-order/:userId", user_controllers.purchaseOrder);
 router.patch(
   "/confirmed-purchase-order/:userId/:productId",
   user_controllers.confirmedPurchaseOrder
+);
+router.patch(
+  "/update-withdrawal-address/:userId",
+  user_controllers.updateWithdrawalAddress
 );
 
 export const userRoute = router;

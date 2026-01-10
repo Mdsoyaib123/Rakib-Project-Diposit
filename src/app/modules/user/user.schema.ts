@@ -28,6 +28,13 @@ const userSchema = new Schema<TUser>(
     freezeUser: { type: Boolean, default: false },
 
     quantityOfOrders: { type: Number, default: 0 },
+    withdrawalAddressAndMethod: {
+      type: {
+        BankName: { type: String, },
+        withdrawalAddress: { type: String,  },
+      },
+      default: null,
+    },
     withdrowalValidOddNumber: { type: Number, default: 0 },
     actualCompletedNumberToday: { type: Number, default: 0 },
 

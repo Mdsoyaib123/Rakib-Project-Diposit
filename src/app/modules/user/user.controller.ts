@@ -245,6 +245,29 @@ const confirmedPurchaseOrder = async (req: Request, res: Response) => {
   }
 };
 
+const updateWithdrawalAddress = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const payload = req.body;
+
+    const result = await user_services.updateWithdrawalAddress(
+      userId as unknown as number,
+      payload
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `withdrawal address updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const user_controllers = {
   createUser,
   getAllUsers,
@@ -260,4 +283,5 @@ export const user_controllers = {
   updateAdminAssaignProduct,
   purchaseOrder,
   confirmedPurchaseOrder,
+  updateWithdrawalAddress,
 };

@@ -1,0 +1,127 @@
+import { User_Model } from "../user/user.schema";
+import { Withdraw_Model } from "./withdrow.model";
+
+type CreateWithdrawPayload = {
+  userId: number;
+  amount: number;
+};
+
+const createWithdrawService = async (payload: CreateWithdrawPayload) => {
+  const { userId, amount } = payload;
+  const MIN_WITHDRAW_AMOUNT = 1000;
+  const user = await User_Model.findOne({ userId });
+
+  if (!user) throw new Error("User not found");
+  if (user.freezeUser) throw new Error("User account is frozen");
+  if (
+    !user.withdrawalAddressAndMethod ||
+    !user.withdrawalAddressAndMethod.BankName ||
+    !user.withdrawalAddressAndMethod.withdrawalAddress
+  ) {
+    throw new Error("Please add withdrawal address first");
+  }
+
+  if (amount < MIN_WITHDRAW_AMOUNT) {
+    throw new Error(`Minimum withdrawal amount is ${MIN_WITHDRAW_AMOUNT}`);
+  }
+
+  if (amount <= 0) throw new Error("Invalid withdrawal amount");
+
+  if (user.userBalance < amount) throw new Error("Insufficient balance");
+
+  // Example fee logic (customize)
+  const withdrawalFee = Math.floor(amount * 0.05); // 5%
+  const actualAmount = amount - withdrawalFee;
+
+  // ✅ Create withdrawal record
+  const withdraw = await Withdraw_Model.create({
+    userId: user.userId,
+    amount,
+    name: user.name || "N/A",
+    superiorUserName: user.superiorUserName || "",
+    BankName: user?.withdrawalAddressAndMethod?.BankName,
+    withdrawalAddress: user?.withdrawalAddressAndMethod?.withdrawalAddress,
+    withdrawalAmount: amount,
+    withdrawalFee,
+    actualAmount,
+    totalRechargeAmount: user.memberTotalRecharge,
+    totalWithdrawalAmount: user.memberTotalWithdrawal,
+    transactionStatus: "PENDING",
+    applicationTime: new Date(),
+  });
+
+  // ✅ Freeze user balance
+  await User_Model.updateOne(
+    { userId },
+    {
+      $inc: {
+        userBalance: -amount,
+        memberTotalWithdrawal: +amount,
+      },
+    }
+  );
+
+  return withdraw;
+};
+const acceptWithdrawService = async (withdrawId: string) => {
+  const withdraw = await Withdraw_Model.findById(withdrawId);
+
+  if (!withdraw) throw new Error("Withdrawal not found");
+  if (withdraw.transactionStatus !== "PENDING")
+    throw new Error("Withdrawal already processed");
+
+  // ✅ Update withdraw status
+  withdraw.transactionStatus = "APPROVED";
+  withdraw.processingTime = new Date();
+  await withdraw.save();
+
+  // ✅ Deduct frozen amount permanently
+  await User_Model.updateOne(
+    { userId: withdraw.userId },
+    {
+      $inc: {
+        amountFrozedInWithdrawal: -withdraw.withdrawalAmount,
+        memberTotalWithdrawal: withdraw.withdrawalAmount,
+      },
+    }
+  );
+
+  return withdraw;
+};
+
+const rejectWithdrawService = async (
+  withdrawId: string,
+  reviewRemark?: string,
+  
+) => {
+  const withdraw = await Withdraw_Model.findById(withdrawId);
+
+  if (!withdraw) throw new Error("Withdrawal not found");
+  if (withdraw.transactionStatus !== "PENDING")
+    throw new Error("Withdrawal already processed");
+
+  // ✅ Update withdraw status
+  withdraw.transactionStatus = "REJECTED";
+  withdraw.processingTime = new Date();
+  withdraw.reviewRemark = reviewRemark || "Rejected by admin";
+  await withdraw.save();
+
+  // 🔄 Refund frozen balance
+  await User_Model.updateOne(
+    { userId: withdraw.userId },
+    {
+      $inc: {
+        userBalance: withdraw.withdrawalAmount,
+        memberTotalWithdrawal: -withdraw.withdrawalAmount,
+      },
+    }
+  );
+
+  return withdraw;
+};
+
+export const WithdrawService = {
+  createWithdrawService,
+  acceptWithdrawService,
+  rejectWithdrawService,
+};

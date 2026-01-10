@@ -319,6 +319,14 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
   };
 };
 
+const updateWithdrawalAddress = async (userId: number, payload: any) => {
+  return await User_Model.findOneAndUpdate(
+    { userId: userId },
+    { withdrawalAddressAndMethod: payload },
+    { new: true }
+  );
+};
+
 export const user_services = {
   createUser,
   getAllUsers,
@@ -335,4 +343,5 @@ export const user_services = {
   updateAdminAssaignProduct,
   purchaseOrder,
   confirmedPurchaseOrder,
+  updateWithdrawalAddress,
 };

@@ -11,6 +11,10 @@ export type TUser = {
   superiorUserId?: string;
   superiorUserName?: string;
   quantityOfOrders?: number;
+  withdrawalAddressAndMethod?: {
+    BankName: string;
+    withdrawalAddress: string;
+  };
   withdrowalValidOddNumber?: number;
   actualCompletedNumberToday?: number;
   userBalance: number;
