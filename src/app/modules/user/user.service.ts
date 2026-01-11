@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { generateUniqueInvitationCode } from "../../utils/genarateInvitationCode";
 import { ProductModel } from "../product/product.model";
 import { TUser } from "./user.interface";
@@ -244,9 +245,13 @@ const purchaseOrder = async (userId: number) => {
   );
 
   if (forcedProductRule) {
-    product = await ProductModel.findOne({
-      productId: forcedProductRule.productId,
-    }).lean();
+    product = await ProductModel.findOneAndUpdate(
+      {
+        productId: forcedProductRule.productId,
+      },
+      {},
+      { new: true }
+    ).lean();
 
     if (!product) throw new Error("Assigned product not found");
 
@@ -268,55 +273,84 @@ const purchaseOrder = async (userId: number) => {
     orderNumber: currentOrderNumber,
     product,
     isAdminAssigned,
+    outOfBalance: product.price - user.userBalance,
   };
 };
 
 const confirmedPurchaseOrder = async (userId: number, productId: number) => {
-  const user: any = await User_Model.findOne({ userId });
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!user) throw new Error("User not found");
-  if (user.quantityOfOrders <= 0)
-    return { message: "Insufficient order quantity" };
+  try {
+    const user: any = await User_Model.findOne({ userId }).session(session);
 
-  const currentOrderNumber = user.completedOrdersCount + 1;
+    if (!user) throw new Error("User not found");
+    if (user.quantityOfOrders <= 0)
+      return { message: "Insufficient order quantity" };
 
-  const product = await ProductModel.findOne({
-    productId: productId,
-  });
+    const currentOrderNumber = user.completedOrdersCount + 1;
 
-  if (!product) throw new Error("Product not found");
+    const product = await ProductModel.findOne({
+      productId: productId,
+    }).session(session);
 
-  let forcedProductRule: any = null;
+    console.log('product', product);
 
-  forcedProductRule = user.adminAssaignProducts?.find(
-    (rule: any) => rule.orderNumber === currentOrderNumber
-  );
+    if (!product) throw new Error("Product not found");
 
-  // ✅ ATOMIC UPDATE
-  const updateQuery: any = {
-    $inc: {
-      quantityOfOrders: -1,
-      completedOrdersCount: 1,
-      userBalance: product.commission,
-    },
-    $push: {
-      completedOrderProducts: product.productId.toString(),
-    },
-  };
+    let forcedProductRule: any = null;
 
-  if (forcedProductRule) {
-    updateQuery.$pull = {
-      adminAssaignProducts: { orderNumber: currentOrderNumber },
+    forcedProductRule = user.adminAssaignProducts?.find(
+      (rule: any) => rule.orderNumber === currentOrderNumber
+    );
+
+    const productCommisionTenpercent = (product.price * 10) / 100;
+    console.log("ten persent", productCommisionTenpercent);
+    console.log("prodcut commision", product.commission);
+
+    // ✅ SAME UPDATE LOGIC
+    const updateQuery: any = {
+      $inc: {
+        quantityOfOrders: -1,
+        completedOrdersCount: 1,
+        userBalance: forcedProductRule
+          ? productCommisionTenpercent
+          : product.commission,
+      },
+      $push: {
+        completedOrderProducts: product.productId.toString(),
+      },
     };
+
+    if (forcedProductRule) {
+      updateQuery.$pull = {
+        adminAssaignProducts: { orderNumber: currentOrderNumber },
+      };
+    }
+
+    await User_Model.updateOne({ userId }, updateQuery, { session });
+
+    if (product.isAdminAssigned) {
+      await ProductModel.updateOne(
+        { productId: product.productId },
+        { $set: { isAdminAssigned: false } },
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return {
+      orderNumber: currentOrderNumber,
+      productId: product.productId,
+      user,
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  await User_Model.updateOne({ userId }, updateQuery);
-
-  return {
-    orderNumber: currentOrderNumber,
-    productId: product.productId,
-    user,
-  };
 };
 
 const updateWithdrawalAddress = async (userId: number, payload: any) => {
