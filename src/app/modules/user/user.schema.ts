@@ -30,8 +30,8 @@ const userSchema = new Schema<TUser>(
     quantityOfOrders: { type: Number, default: 0 },
     withdrawalAddressAndMethod: {
       type: {
-        BankName: { type: String, },
-        withdrawalAddress: { type: String,  },
+        BankName: { type: String },
+        withdrawalAddress: { type: String },
       },
       default: null,
     },
@@ -55,9 +55,28 @@ const userSchema = new Schema<TUser>(
     userSelectedPackage: { type: Number },
     completedOrdersCount: { type: Number, default: 0 },
     adminAssaignProducts: {
-      type: [{ productId: Number, orderNumber: Number }],
+      type: [
+        {
+          productId: { type: Number, required: true },
+          orderNumber: { type: Number, required: true },
+          mysterybox: {
+            type: {
+              method: {
+                type: String,
+                enum: ["cash", "12x"],
+              },
+              amount: {
+                type: String,
+              },
+            },
+            required: false, // ✅ optional
+            default: undefined,
+          },
+        },
+      ],
       default: [],
     },
+
     completedOrderProducts: { type: [String], default: [] },
   },
   { timestamps: true }

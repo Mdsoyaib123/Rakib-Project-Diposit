@@ -183,12 +183,15 @@ const updateQuantityOfOrders = async (req: Request, res: Response) => {
 const updateAdminAssaignProduct = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const { productId, orderNumber } = req.body;
+    const { productId, orderNumber, mysteryboxMethod, mysteryboxAmount } =
+      req.body;
 
     const result = await user_services.updateAdminAssaignProduct(
       userId as unknown as number,
       productId,
-      orderNumber
+      orderNumber,
+      mysteryboxMethod,
+      mysteryboxAmount
     );
 
     res.status(200).json({

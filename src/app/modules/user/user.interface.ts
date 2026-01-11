@@ -30,6 +30,14 @@ export type TUser = {
   userOrderAmountSlot: number[];
   userSelectedPackage?: number;
   completedOrdersCount?: number;
-  adminAssaignProducts?: string[];
+  adminAssaignProducts?: {
+    productId: number;
+    orderNumber: number;
+    mysterybox?: {
+      method: "cash" | "12x";
+      amount: string;
+    };
+  }[];
+
   completedOrderProducts?: string[];
 };

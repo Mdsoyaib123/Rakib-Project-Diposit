@@ -5,6 +5,7 @@ import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
 
+
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
     invitationCode: payload.invitationCode,
@@ -197,7 +198,9 @@ const updateQuantityOfOrders = async (userId: number, quantity: number) => {
 const updateAdminAssaignProduct = async (
   userId: number,
   productId: number,
-  orderNumber: number
+  orderNumber: number,
+  mysteryboxMethod: string,
+  mysteryboxAmount: string
 ) => {
   const updatedUser = await User_Model.findOneAndUpdate(
     {
@@ -209,6 +212,10 @@ const updateAdminAssaignProduct = async (
         adminAssaignProducts: {
           productId,
           orderNumber,
+          mysterybox: {
+            method: mysteryboxMethod,
+            amount: mysteryboxAmount,
+          },
         },
       },
     },
@@ -274,6 +281,12 @@ const purchaseOrder = async (userId: number) => {
     product,
     isAdminAssigned,
     outOfBalance: product.price - user.userBalance,
+    mysteryboxMethod: forcedProductRule?.mysterybox?.method
+      ? forcedProductRule?.mysterybox?.method
+      : null,
+    mysteryboxAmount: forcedProductRule?.mysterybox?.amount
+      ? forcedProductRule?.mysterybox?.amount
+      : null,
   };
 };
 
@@ -294,7 +307,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       productId: productId,
     }).session(session);
 
-    console.log('product', product);
+    console.log("product", product);
 
     if (!product) throw new Error("Product not found");
 
@@ -304,7 +317,13 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       (rule: any) => rule.orderNumber === currentOrderNumber
     );
 
-    const productCommisionTenpercent = (product.price * 10) / 100;
+    const productCommisionTenpercent =
+      forcedProductRule?.mysterybox?.method === "cash"
+        ? Number(forcedProductRule?.mysterybox?.amount)
+        : forcedProductRule?.mysterybox?.method === "12x"
+        ? (product.price / 2) 
+        : (product.price * 10) / 100;
+
     console.log("ten persent", productCommisionTenpercent);
     console.log("prodcut commision", product.commission);
 
@@ -314,7 +333,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         quantityOfOrders: -1,
         completedOrdersCount: 1,
         userBalance: forcedProductRule
-          ? productCommisionTenpercent
+          ? Number(productCommisionTenpercent)
           : product.commission,
       },
       $push: {
