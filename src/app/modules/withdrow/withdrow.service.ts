@@ -116,8 +116,41 @@ const rejectWithdrawService = async (
   return withdraw;
 };
 
+const getAllWithdrawsService = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    Withdraw_Model.find().skip(skip).limit(limit).sort({ createdAt: -1 }),
+    Withdraw_Model.countDocuments(),
+  ]);
+
+  return {
+    data,
+   
+  };
+};
+
+const getSingleUserWithdraws = async (userId: number, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    Withdraw_Model.find({ userId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }),
+    Withdraw_Model.countDocuments({ userId }),
+  ]);
+
+  return {
+    data,
+   
+  };
+};
+
 export const WithdrawService = {
   createWithdrawService,
   acceptWithdrawService,
   rejectWithdrawService,
+  getAllWithdrawsService,
+  getSingleUserWithdraws,
 };

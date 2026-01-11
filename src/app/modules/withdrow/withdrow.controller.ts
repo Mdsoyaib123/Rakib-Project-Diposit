@@ -39,7 +39,7 @@ const acceptWithdraw = async (req: Request, res: Response) => {
 
 const rejectWithdraw = async (req: Request, res: Response) => {
   try {
-    const { withdrawId  } = req.params;
+    const { withdrawId } = req.params;
     const { reviewRemark } = req.body;
 
     const result = await WithdrawService.rejectWithdrawService(
@@ -59,9 +59,54 @@ const rejectWithdraw = async (req: Request, res: Response) => {
     });
   }
 };
+const getAllWithdraws = async (req: Request, res: Response) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await WithdrawService.getAllWithdrawsService(page, limit);
+
+    res.status(200).json({
+      success: true,
+      message: "Withdraws retrieved successfully",
+      data: result.data,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const getSingleUserWithdraws = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await WithdrawService.getSingleUserWithdraws(
+      Number(userId),
+      page,
+      limit
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "User withdraws retrieved successfully",
+      data: result.data,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const WithdrawController = {
   createWithdrawController,
   acceptWithdraw,
   rejectWithdraw,
+  getAllWithdraws,
+  getSingleUserWithdraws,
 };
