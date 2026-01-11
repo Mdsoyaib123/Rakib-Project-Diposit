@@ -7,6 +7,7 @@ export type TUser = {
   confirmPassword: string;
   invitationCode: string;
   userId: number;
+  userDiopsitType: "trial" | "diposits";
   freezeUser?: boolean;
   superiorUserId?: string;
   superiorUserName?: string;

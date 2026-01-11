@@ -25,9 +25,11 @@ const userSchema = new Schema<TUser>(
       unique: true,
       default: () => Math.floor(1000000 + Math.random() * 9000000),
     },
+    userDiopsitType: { type: String, default: "trial" },
     freezeUser: { type: Boolean, default: false },
 
     quantityOfOrders: { type: Number, default: 0 },
+    completedOrdersCount: { type: Number, default: 0 },
     withdrawalAddressAndMethod: {
       type: {
         BankName: { type: String },
@@ -53,7 +55,7 @@ const userSchema = new Schema<TUser>(
     userType: { type: String, required: true, default: "Normal" },
     userOrderAmountSlot: { type: [Number], default: [] },
     userSelectedPackage: { type: Number },
-    completedOrdersCount: { type: Number, default: 0 },
+
     adminAssaignProducts: {
       type: [
         {
