@@ -5,7 +5,6 @@ import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
 
-
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
     invitationCode: payload.invitationCode,
@@ -38,6 +37,7 @@ const createUser = async (payload: Partial<TUser>) => {
 
   const invitationCode = await generateUniqueInvitationCode();
   payload.invitationCode = invitationCode;
+  payload.quantityOfOrders = 25;//default
 
   const user = new User_Model(payload);
 
@@ -181,10 +181,10 @@ const updateUserSelectedPackageAmount = async (
 
   return updatedUser;
 };
-const updateQuantityOfOrders = async (userId: number, quantity: number) => {
+const updateQuantityOfOrders = async (userId: number, round : string , status : boolean ) => {
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
-    { quantityOfOrders: quantity },
+    { "orderRound.round": round, "orderRound.status": status },
     { new: true }
   );
 
@@ -193,6 +193,7 @@ const updateQuantityOfOrders = async (userId: number, quantity: number) => {
   }
 
   return updatedUser;
+ 
 };
 
 const updateAdminAssaignProduct = async (
@@ -321,7 +322,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       forcedProductRule?.mysterybox?.method === "cash"
         ? Number(forcedProductRule?.mysterybox?.amount)
         : forcedProductRule?.mysterybox?.method === "12x"
-        ? (product.price / 2) 
+        ? product.price / 2
         : (product.price * 10) / 100;
 
     console.log("ten persent", productCommisionTenpercent);

@@ -7,11 +7,16 @@ export type TUser = {
   confirmPassword: string;
   invitationCode: string;
   userId: number;
-  userDiopsitType: "trial" | "diposits";
+  userDiopsitType: "trial" | "deposit";
   freezeUser?: boolean;
   superiorUserId?: string;
   superiorUserName?: string;
   quantityOfOrders?: number;
+  orderRound : {
+    round: 'one' | 'two'
+    status : boolean,
+    
+  },
   withdrawalAddressAndMethod?: {
     BankName: string;
     withdrawalAddress: string;

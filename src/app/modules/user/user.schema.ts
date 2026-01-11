@@ -25,8 +25,31 @@ const userSchema = new Schema<TUser>(
       unique: true,
       default: () => Math.floor(1000000 + Math.random() * 9000000),
     },
-    userDiopsitType: { type: String, default: "trial" },
+    userDiopsitType: {
+      type: String,
+      enum: ["trial", "deposit"],
+      default: "trial",
+    },
     freezeUser: { type: Boolean, default: false },
+
+    orderRound: {
+      type: {
+        round: {
+          type: String,
+          enum: ["one", "two"],
+          required: true,
+          default: "one",
+        },
+        status: {
+          type: Boolean,
+          default: true, // active round
+        },
+      },
+      default: {
+        round: "one",
+        status: false,
+      },
+    },
 
     quantityOfOrders: { type: Number, default: 0 },
     completedOrdersCount: { type: Number, default: 0 },
