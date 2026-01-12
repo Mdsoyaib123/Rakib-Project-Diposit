@@ -40,6 +40,8 @@ const createUser = async (payload: Partial<TUser>) => {
 
   payload.quantityOfOrders = 25; // Trial round orders
   payload.userDiopsitType = "trial";
+  payload.userBalance = 10000;
+  payload.userSelectedPackage = 10000;
   payload.orderRound = {
     round: "trial",
     status: true,
@@ -169,7 +171,8 @@ const enableOrderRound = async (
       $set: {
         "orderRound.round": round,
         "orderRound.status": status,
-        quantityOfOrders: quantity, // admin decides quantity
+        quantityOfOrders: quantity, // admin decides quantity 
+        completedOrdersCount: 0
       },
     },
     { new: true }
