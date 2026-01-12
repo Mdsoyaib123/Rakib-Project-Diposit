@@ -171,8 +171,8 @@ const enableOrderRound = async (
       $set: {
         "orderRound.round": round,
         "orderRound.status": status,
-        quantityOfOrders: quantity, // admin decides quantity 
-        completedOrdersCount: 0
+        quantityOfOrders: quantity, // admin decides quantity
+        completedOrdersCount: 0,
       },
     },
     { new: true }
@@ -440,6 +440,31 @@ const updateWithdrawalAddress = async (userId: number, payload: any) => {
     { new: true }
   );
 };
+const getUserCompletedProducts = async (userId: number) => {
+  const user = await User_Model.findOne({ userId }).lean();
+
+  if (!user || !user.completedOrderProducts?.length) {
+    return [];
+  }
+
+  // convert string ids → number ids
+  const productIds = user?.completedOrderProducts.map((id) => Number(id));
+
+  // fetch all unique products once (performance)
+  const products = await ProductModel.find({
+    productId: { $in: productIds },
+  }).lean();
+  console.log("products", products);
+
+  // create lookup map
+  const productMap = new Map<number, any>();
+  products.forEach((p) => productMap.set(p.productId, p));
+
+  // rebuild array WITH duplicates
+  const result = productIds.map((id) => productMap.get(id)).filter(Boolean);
+
+  return result;
+};
 
 export const user_services = {
   createUser,
@@ -459,4 +484,5 @@ export const user_services = {
   purchaseOrder,
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
+  getUserCompletedProducts,
 };

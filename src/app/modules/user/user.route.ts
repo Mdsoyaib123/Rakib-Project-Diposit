@@ -38,5 +38,9 @@ router.patch(
   "/update-withdrawal-address/:userId",
   user_controllers.updateWithdrawalAddress
 );
+router.get(
+  "/get-user-completed-products/:userId",
+  user_controllers.getUserCompletedProducts
+);
 
 export const userRoute = router;

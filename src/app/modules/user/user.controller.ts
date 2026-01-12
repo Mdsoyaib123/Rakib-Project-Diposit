@@ -185,7 +185,6 @@ const updateQuantityOfOrders = async (req: Request, res: Response) => {
       userId as unknown as number,
       quantity,
       status
-
     );
 
     res.status(200).json({
@@ -290,6 +289,26 @@ const updateWithdrawalAddress = async (req: Request, res: Response) => {
     });
   }
 };
+const getUserCompletedProducts = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await user_services.getUserCompletedProducts(
+      userId as unknown as number
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `get user completed products successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const user_controllers = {
   createUser,
@@ -308,4 +327,5 @@ export const user_controllers = {
   purchaseOrder,
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
+  getUserCompletedProducts
 };
