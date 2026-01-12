@@ -160,7 +160,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
 const enableOrderRound = async (
   userId: number,
   round: "round_one" | "round_two",
-  status : boolean,
+  status: boolean,
   quantity: number = 25
 ) => {
   return await User_Model.findOneAndUpdate(
@@ -365,6 +365,9 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     console.log("product", product);
 
     if (!product) throw new Error("Product not found");
+
+    if (user.userBalance < product.price)
+      return { message: "Insufficient balance to purchase this product" };
 
     let forcedProductRule: any = null;
 
