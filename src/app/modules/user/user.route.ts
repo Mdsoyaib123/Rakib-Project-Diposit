@@ -33,6 +33,10 @@ router.patch(
   "/remove-mystery-reward/:userId",
   user_controllers.removeMysteryReward
 );
+router.patch(
+  "/add-check-in-reward/:userId",
+  user_controllers.addCheckInReward
+);
 router.get("/purchase-order/:userId", user_controllers.purchaseOrder);
 router.patch(
   "/confirmed-purchase-order/:userId/:productId",

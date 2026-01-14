@@ -45,7 +45,12 @@ export type TUser = {
       amount: string;
     };
   }[];
-  mysteryReward?: Number
+  mysteryReward?: Number;
+  dailyCheckInReward: {
+    lastCheckInDate: Date | null;
+    totalCheckIns: number;
+  };
 
   completedOrderProducts?: string[];
+  orderCountForCheckIn?: number;
 };

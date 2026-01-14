@@ -333,12 +333,13 @@ const removeMysteryReward = async (userId: number) => {
       throw new Error("User not found");
     }
 
-
-
     const updatedUser = await User_Model.findOneAndUpdate(
       { userId },
       {
-        $inc: { userBalance: user.mysteryReward , dailyProfit : user.mysteryReward},
+        $inc: {
+          userBalance: user.mysteryReward,
+          dailyProfit: user.mysteryReward,
+        },
         $unset: { mysteryReward: 0 },
       },
       { new: true }
@@ -348,6 +349,67 @@ const removeMysteryReward = async (userId: number) => {
   } catch (error: any) {
     console.error("❌ Error in removeMysteryReward:", error.message);
     throw new Error(error.message || "Failed to remove mystery reward");
+  }
+};
+const addCheckInReward = async (userId: number , checkInAmount : number) => {
+  try {
+    if (!userId) {
+      throw new Error("UserId is required");
+    }
+
+    const user: any = await User_Model.findOne({ userId });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // ❌ Trial round users cannot check in
+    if (user?.orderRound?.round === "trial") {
+      throw new Error("Daily check-in is not available in trial round");
+    }
+
+    // ❌ Must complete at least 40 orders
+    if (user?.orderCountForCheckIn <= 40) {
+      throw new Error("Complete at least 40 orders to enable daily check-in");
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastCheckIn = user.dailyCheckInReward?.lastCheckInDate
+      ? new Date(user.dailyCheckInReward.lastCheckInDate)
+      : null;
+
+    if (lastCheckIn) {
+      lastCheckIn.setHours(0, 0, 0, 0);
+
+      // ❌ Already checked in today
+      if (lastCheckIn.getTime() === today.getTime()) {
+        throw new Error("You have already checked in today");
+      }
+    }
+
+
+
+    const updatedUser = await User_Model.findOneAndUpdate(
+      { userId },
+      {
+        $inc: {
+          userBalance: checkInAmount,
+          dailyProfit: checkInAmount,
+          "dailyCheckInReward.totalCheckIns": 1,
+        },
+        $set: {
+          "dailyCheckInReward.lastCheckInDate": new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    return updatedUser;
+  } catch (error: any) {
+    console.error("❌ Error in addCheckInReward:", error.message);
+    throw new Error(error.message || "Failed to add daily check-in reward");
   }
 };
 
@@ -467,6 +529,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       $inc: {
         quantityOfOrders: -1,
         completedOrdersCount: 1,
+        orderCountForCheckIn: 1,
         userBalance: forcedProductRule
           ? Number(productCommisionTenpercent)
           : product.commission,
@@ -560,6 +623,7 @@ export const user_services = {
   updateQuantityOfOrders,
   updateAdminAssaignProduct,
   removeMysteryReward,
+  addCheckInReward,
   purchaseOrder,
   confirmedPurchaseOrder,
   updateWithdrawalAddress,

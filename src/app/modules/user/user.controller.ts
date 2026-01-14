@@ -229,14 +229,36 @@ const removeMysteryReward = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
 
-
     const result = await user_services.removeMysteryReward(
-      userId as unknown as number,
+      userId as unknown as number
     );
 
     res.status(200).json({
       success: true,
       message: `remove the mystery reward successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const addCheckInReward = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const { checkInAmount } = req.body;
+
+    const result = await user_services.addCheckInReward(
+      userId as unknown as number,
+      checkInAmount as unknown as number
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Check In reward added successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -346,8 +368,9 @@ export const user_controllers = {
   updateUserSelectedPackageAmount,
   updateAdminAssaignProduct,
   removeMysteryReward,
+  addCheckInReward,
   purchaseOrder,
   confirmedPurchaseOrder,
   updateWithdrawalAddress,
-  getUserCompletedProducts
+  getUserCompletedProducts,
 };

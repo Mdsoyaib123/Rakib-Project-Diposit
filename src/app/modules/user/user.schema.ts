@@ -111,7 +111,25 @@ const userSchema = new Schema<TUser>(
       type: Number,
       default: 0,
     },
+    dailyCheckInReward: {
+      type: {
+        lastCheckInDate: {
+          type: Date,
+          default: null,
+        },
+        totalCheckIns: {
+          type: Number,
+          default: 0,
+        },
+      },
+      default: {
+        lastCheckInDate: null,
+        totalCheckIns: 0,
+      },
+    },
+
     completedOrderProducts: { type: [String], default: [] },
+    orderCountForCheckIn: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
