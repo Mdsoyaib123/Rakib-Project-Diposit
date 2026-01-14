@@ -84,11 +84,11 @@ const userSchema = new Schema<TUser>(
     },
     userSelectedPackage: { type: Number },
 
-    adminAssaignProducts: {
+    adminAssaignProductsOrRewards: {
       type: [
         {
-          productId: { type: Number, required: true },
-          orderNumber: { type: Number, required: true },
+          productId: { type: Number },
+          orderNumber: { type: Number },
           mysterybox: {
             type: {
               method: {
@@ -107,6 +107,10 @@ const userSchema = new Schema<TUser>(
       default: [],
     },
 
+    mysteryReward: {
+      type: Number,
+      default: 0,
+    },
     completedOrderProducts: { type: [String], default: [] },
   },
   { timestamps: true }

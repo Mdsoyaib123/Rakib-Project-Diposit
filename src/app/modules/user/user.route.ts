@@ -29,6 +29,10 @@ router.patch(
   "/update-admin-assigned-product/:userId",
   user_controllers.updateAdminAssaignProduct
 );
+router.patch(
+  "/remove-mystery-reward/:userId",
+  user_controllers.removeMysteryReward
+);
 router.get("/purchase-order/:userId", user_controllers.purchaseOrder);
 router.patch(
   "/confirmed-purchase-order/:userId/:productId",

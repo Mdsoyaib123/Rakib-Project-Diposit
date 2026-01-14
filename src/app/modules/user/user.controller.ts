@@ -225,6 +225,27 @@ const updateAdminAssaignProduct = async (req: Request, res: Response) => {
     });
   }
 };
+const removeMysteryReward = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+
+    const result = await user_services.removeMysteryReward(
+      userId as unknown as number,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `remove the mystery reward successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 const purchaseOrder = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
@@ -324,6 +345,7 @@ export const user_controllers = {
   updateQuantityOfOrders,
   updateUserSelectedPackageAmount,
   updateAdminAssaignProduct,
+  removeMysteryReward,
   purchaseOrder,
   confirmedPurchaseOrder,
   updateWithdrawalAddress,

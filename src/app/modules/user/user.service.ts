@@ -4,6 +4,7 @@ import { ProductModel } from "../product/product.model";
 import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
+import { th } from "zod/v4/locales";
 
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
@@ -28,7 +29,7 @@ const createUser = async (payload: Partial<TUser>) => {
   });
 
   if (ieExists) {
-    throw new Error("Phone number already exists");
+    throw new Error("Phone number or email is already exists");
   }
 
   if (payload?.password) {
@@ -244,38 +245,110 @@ const updateQuantityOfOrders = async (
 
 const updateAdminAssaignProduct = async (
   userId: number,
-  productId: number,
-  orderNumber: number,
-  mysteryboxMethod: string,
-  mysteryboxAmount: string
+  productId?: number,
+  orderNumber?: number,
+  mysteryboxMethod?: string,
+  mysteryboxAmount?: string
 ) => {
-  const updatedUser = await User_Model.findOneAndUpdate(
-    {
-      userId: userId,
-      "adminAssaignProducts.orderNumber": { $ne: orderNumber },
-    },
-    {
-      $push: {
-        adminAssaignProducts: {
-          productId,
-          orderNumber,
-          mysterybox: {
-            method: mysteryboxMethod,
-            amount: mysteryboxAmount,
+  try {
+    // 🔹 CASE 1: Product + orderNumber exists
+    if (productId && orderNumber) {
+      const updatedUser = await User_Model.findOneAndUpdate(
+        {
+          userId,
+          "adminAssaignProductsOrRewards.orderNumber": { $ne: orderNumber },
+        },
+        {
+          $push: {
+            adminAssaignProductsOrRewards: {
+              productId,
+              orderNumber,
+              ...(mysteryboxMethod && mysteryboxAmount
+                ? {
+                    mysterybox: {
+                      method: mysteryboxMethod,
+                      amount: mysteryboxAmount,
+                    },
+                  }
+                : {}),
+            },
           },
         },
-      },
-    },
-    { new: true }
-  );
+        { new: true }
+      );
 
-  if (!updatedUser) {
-    throw new Error(
-      `Order number ${orderNumber} already assigned or user not found`
-    );
+      if (!updatedUser) {
+        throw new Error(
+          `Order number ${orderNumber} already assigned or user not found`
+        );
+      }
+
+      return updatedUser;
+    }
+
+    if (
+      mysteryboxMethod === "12x" &&
+      mysteryboxAmount &&
+      !productId &&
+      !orderNumber
+    ) {
+      throw new Error("Product or order number is required for 12x mysterybox");
+    }
+
+    // 🔹 CASE 2: ONLY mysterybox (no product, no order)
+
+    if (mysteryboxMethod === "cash" && mysteryboxAmount) {
+      const updatedUser = await User_Model.findOneAndUpdate(
+        { userId },
+        {
+          $set: {
+            mysteryReward: mysteryboxAmount,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        throw new Error("User not found");
+      }
+
+      return updatedUser;
+    }
+  } catch (error: any) {
+    console.error("❌ Error in updateAdminAssaignProduct:", error.message);
+
+    // Re-throw for controller to handle
+    throw new Error(error.message || "Failed to assign product or reward");
   }
+};
+const removeMysteryReward = async (userId: number) => {
+  try {
+    if (!userId) {
+      throw new Error("UserId is required");
+    }
 
-  return updatedUser;
+    const user = await User_Model.findOne({ userId }).select("mysteryReward");
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+
+
+    const updatedUser = await User_Model.findOneAndUpdate(
+      { userId },
+      {
+        $inc: { userBalance: user.mysteryReward , dailyProfit : user.mysteryReward},
+        $unset: { mysteryReward: 0 },
+      },
+      { new: true }
+    );
+
+    return updatedUser;
+  } catch (error: any) {
+    console.error("❌ Error in removeMysteryReward:", error.message);
+    throw new Error(error.message || "Failed to remove mystery reward");
+  }
 };
 
 const purchaseOrder = async (userId: number) => {
@@ -298,7 +371,7 @@ const purchaseOrder = async (userId: number) => {
   let product: any;
   let isAdminAssigned = false;
 
-  const forcedProductRule = user.adminAssaignProducts?.find(
+  const forcedProductRule = user.adminAssaignProductsOrRewards?.find(
     (rule: any) => rule.orderNumber === currentOrderNumber
   );
 
@@ -375,7 +448,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
     let forcedProductRule: any = null;
 
-    forcedProductRule = user.adminAssaignProducts?.find(
+    forcedProductRule = user.adminAssaignProductsOrRewards?.find(
       (rule: any) => rule.orderNumber === currentOrderNumber
     );
 
@@ -409,7 +482,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
     if (forcedProductRule) {
       updateQuery.$pull = {
-        adminAssaignProducts: { orderNumber: currentOrderNumber },
+        adminAssaignProductsOrRewards: { orderNumber: currentOrderNumber },
       };
     }
 
@@ -486,6 +559,7 @@ export const user_services = {
   updateUserSelectedPackageAmount,
   updateQuantityOfOrders,
   updateAdminAssaignProduct,
+  removeMysteryReward,
   purchaseOrder,
   confirmedPurchaseOrder,
   updateWithdrawalAddress,

@@ -37,14 +37,15 @@ export type TUser = {
   userOrderAmountSlot: number[];
   userSelectedPackage?: number;
   completedOrdersCount?: number;
-  adminAssaignProducts?: {
-    productId: number;
-    orderNumber: number;
+  adminAssaignProductsOrRewards?: {
+    productId?: number;
+    orderNumber?: number;
     mysterybox?: {
       method: "cash" | "12x";
       amount: string;
     };
   }[];
+  mysteryReward?: Number
 
   completedOrderProducts?: string[];
 };
