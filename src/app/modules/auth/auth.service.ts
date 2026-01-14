@@ -16,13 +16,11 @@ const login_user_from_db = async (
 ) => {
   const isExistAccount = await User_Model.findOne({
     phoneNumber: payload.phoneNumber,
+    freezeUser: false,
   });
   // console.log("is account", isExistAccount);
   if (!isExistAccount) {
-    throw new AppError(
-      "Account does not exist or frozen",
-      httpStatus.NOT_FOUND
-    );
+    throw new AppError("Account is frozen", httpStatus.NOT_FOUND);
   }
   console.log("ip address 444", ipAddress);
 
