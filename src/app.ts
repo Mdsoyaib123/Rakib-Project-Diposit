@@ -24,6 +24,8 @@ app.use(
       "https://rainbow-sopapillas-9e5e0e.netlify.app",
       "https://juwelo-dashboard.vercel.app",
       "https://juwelo-client.vercel.app",
+      "https://juweloonline.com",
+      "https://admin.juweloonline.com",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
