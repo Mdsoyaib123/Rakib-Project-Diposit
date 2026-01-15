@@ -65,6 +65,7 @@ export const createDefaultSuperAdmin = async () => {
         phoneNumber: "01700000000",
         name: "Admin",
         invitationCode: "adminCode",
+        freezeUser: false,
       });
       console.log("✅ Default Admin created.");
     } else {
