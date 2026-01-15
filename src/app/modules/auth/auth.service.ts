@@ -21,7 +21,7 @@ const login_user_from_db = async (
   });
   // console.log("is account", isExistAccount);
   if (!isExistAccount) {
-    throw new AppError("Account is frozen", httpStatus.NOT_FOUND);
+    throw new AppError("Account is frozen or Not Found", httpStatus.NOT_FOUND);
   }
   console.log("ip address 444", ipAddress);
 
