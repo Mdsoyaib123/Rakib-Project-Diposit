@@ -28,6 +28,7 @@ const login_user = catchAsync(async (req, res) => {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       userId: result.userId,
+      user_id: result.user_id,
       role: result?.role,
     },
   });
