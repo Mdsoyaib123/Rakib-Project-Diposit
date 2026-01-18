@@ -262,6 +262,20 @@ const updateUserSelectedPackageAmount = async (
     throw new Error("Insufficient balance, please recharge first");
   }
 
+  if (
+    user?.orderRound.round === "round_two" &&
+    user?.orderRound.status === false &&
+    user?.quantityOfOrders > 0
+  ) {
+    {
+      return {
+        success: false,
+        message:
+          "please withdraw your money frist , then select another package",
+      };
+    }
+  }
+
   const updatedUser = await User_Model.findOneAndUpdate(
     { userId: userId },
     { userSelectedPackage: amount },
