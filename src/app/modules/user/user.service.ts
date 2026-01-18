@@ -267,7 +267,9 @@ const updateUserSelectedPackageAmount = async (
     user.orderRound.status === false &&
     user.quantityOfOrders > 0;
 
-  if (isBlockedRound) {
+  console.log("is blocked", isBlockedRound);
+
+  if (!isBlockedRound) {
     throw new Error(
       "Please withdraw your money first, then select another package",
     );
