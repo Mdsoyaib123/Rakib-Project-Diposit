@@ -5,7 +5,6 @@ import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
 import { HistoryModel } from "../history/history.model";
-import { success } from "zod";
 
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
