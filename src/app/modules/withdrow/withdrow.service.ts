@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { User_Model } from "../user/user.schema";
 import { Withdraw_Model } from "./withdrow.model";
+import { TWithdraw } from "./withdrow.interface";
 
 type CreateWithdrawPayload = {
   userId: number;
@@ -29,12 +30,24 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
     throw new Error("You can't withdraw before complete all orders");
   }
 
-  if (
-    !user.withdrawalAddressAndMethod ||
-    !user.withdrawalAddressAndMethod.BankName ||
-    !user.withdrawalAddressAndMethod.withdrawalAddress
-  ) {
+  const withdrawal = user.withdrawalAddressAndMethod;
+
+  if (!withdrawal || !withdrawal.withdrawMethod) {
     throw new Error("Please add withdrawal address first");
+  }
+
+  if (
+    withdrawal.withdrawMethod === "BankTransfer" &&
+    (!withdrawal.bankName || !withdrawal.bankAccountNumber)
+  ) {
+    throw new Error("Please add bank withdrawal details");
+  }
+
+  if (
+    withdrawal.withdrawMethod === "MobileBanking" &&
+    (!withdrawal.mobileBankingName || !withdrawal.mobileBankingAccountNumber)
+  ) {
+    throw new Error("Please add mobile banking withdrawal details");
   }
 
   if (amount <= 0) throw new Error("Invalid withdrawal amount");
@@ -45,20 +58,45 @@ const createWithdrawService = async (payload: CreateWithdrawPayload) => {
     throw new Error("Minimum withdrawal amount is 500");
   }
 
-  // ✅ Create withdrawal record
-  const withdraw = await Withdraw_Model.create({
+  const withdrawalMethod = user.withdrawalAddressAndMethod;
+
+  if (!withdrawalMethod) {
+    throw new Error("Withdrawal address not set");
+  }
+
+  const withdrawPayload: Partial<TWithdraw> = {
     userId: user.userId,
     amount,
     name: user.name || "N/A",
     superiorUserName: user.superiorUserName || "",
-    BankName: user?.withdrawalAddressAndMethod?.BankName,
-    withdrawalAddress: user?.withdrawalAddressAndMethod?.withdrawalAddress,
+
+    withdrawMethod: withdrawalMethod.withdrawMethod,
+
     withdrawalAmount: amount,
     totalRechargeAmount: user.memberTotalRecharge,
     totalWithdrawalAmount: user.memberTotalWithdrawal,
+
     transactionStatus: "PENDING",
     applicationTime: new Date(),
-  });
+  };
+
+  // Bank Transfer
+  if (withdrawalMethod.withdrawMethod === "BankTransfer") {
+    withdrawPayload.bankName = withdrawalMethod.bankName;
+    withdrawPayload.bankAccountNumber =
+      withdrawalMethod?.bankAccountNumber as number;
+    withdrawPayload.branchName = withdrawalMethod.branchName;
+    withdrawPayload.district = withdrawalMethod.district;
+  }
+
+  // Mobile Banking
+  if (withdrawalMethod.withdrawMethod === "MobileBanking") {
+    withdrawPayload.mobileBankingName = withdrawalMethod.mobileBankingName;
+    withdrawPayload.mobileBankingAccountNumber =
+      withdrawalMethod?.mobileBankingAccountNumber as number;
+  }
+
+  const withdraw = await Withdraw_Model.create(withdrawPayload);
 
   // ✅ Freeze user balance
   await User_Model.updateOne(
@@ -101,8 +139,6 @@ const acceptWithdrawService = async (withdrawId: string) => {
       },
       { session },
     );
-
-
 
     await session.commitTransaction();
     session.endSession();

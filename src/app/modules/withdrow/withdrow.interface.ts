@@ -1,15 +1,29 @@
 export type TWithdraw = {
   userId: number;
   amount: number;
-  transactionStatus: string;
-  superiorUserName: string;
+
+  transactionStatus: "PENDING" | "APPROVED" | "REJECTED";
+
+  superiorUserName?: string;
   name: string;
-  BankName: string;
-  withdrawalAddress: string;
+
+  withdrawMethod: "BankTransfer" | "MobileBanking";
+
+  // Bank Transfer
+  bankName?: string;
+  bankAccountNumber?: number;
+  branchName?: string;
+  district?: string;
+
+  // Mobile Banking
+  mobileBankingName?: string;
+  mobileBankingAccountNumber?: number;
+
   withdrawalAmount: number;
-  totalRechargeAmount: number;
-  totalWithdrawalAmount: number;
+  totalRechargeAmount?: number;
+  totalWithdrawalAmount?: number;
+
   applicationTime: Date;
-  processingTime: Date;
-  reviewRemark: string;
+  processingTime?: Date;
+  reviewRemark?: string;
 };
