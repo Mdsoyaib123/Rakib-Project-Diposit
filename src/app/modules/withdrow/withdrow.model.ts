@@ -5,7 +5,7 @@ const withdrawSchema = new Schema<TWithdraw>(
   {
     userId: { type: Number, required: true, index: true },
 
-    amount: { type: Number, required: true }, // requested amount
+    amount: { type: Number, required: true },
 
     transactionStatus: {
       type: String,
@@ -16,10 +16,43 @@ const withdrawSchema = new Schema<TWithdraw>(
     superiorUserName: { type: String },
     name: { type: String, required: true },
 
-    BankName: { type: String, required: true },
-    withdrawalAddress: { type: String, required: true },
+    withdrawMethod: {
+      type: String,
+      enum: ["BankTransfer", "MobileBanking"],
+      required: true,
+    },
 
-    withdrawalAmount: { type: Number, required: true }, // before fee
+    // Bank Transfer
+    bankName: {
+      type: String,
+      required: function () {
+        return this.withdrawMethod === "BankTransfer";
+      },
+    },
+    bankAccountNumber: {
+      type: Number,
+      required: function () {
+        return this.withdrawMethod === "BankTransfer";
+      },
+    },
+    branchName: { type: String },
+    district: { type: String },
+
+    // Mobile Banking
+    mobileBankingName: {
+      type: String,
+      required: function () {
+        return this.withdrawMethod === "MobileBanking";
+      },
+    },
+    mobileBankingAccountNumber: {
+      type: Number,
+      required: function () {
+        return this.withdrawMethod === "MobileBanking";
+      },
+    },
+
+    withdrawalAmount: { type: Number, required: true },
     totalRechargeAmount: { type: Number },
     totalWithdrawalAmount: { type: Number },
 
