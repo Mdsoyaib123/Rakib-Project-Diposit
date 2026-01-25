@@ -515,7 +515,7 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
 
 const purchaseOrder = async (userId: number) => {
   const user: any = await User_Model.findOne({ userId }).lean();
-  console.log("user", user);
+  // console.log("user", user);
 
   if (!user) throw new Error("User not found");
   if (user.freezeUser)
@@ -542,7 +542,51 @@ const purchaseOrder = async (userId: number) => {
 
   console.log("forcedProductRule", forcedProductRule);
 
-  if (forcedProductRule.mysterybox?.method === "12x") {
+  if (
+    forcedProductRule?.mysterybox?.method === "12x" &&
+    forcedProductRule?.productId
+  ) {
+    product = await ProductModel.findOne({
+      productId: forcedProductRule.productId,
+    });
+    // if (!product) throw new Error("Assigned product not found");
+
+    isAdminAssigned = true;
+
+    // ✅ Calculate deficit
+    if (user.userBalance < product?.price) {
+      outOfBalance = product?.price - user.userBalance;
+    }
+  } else if (
+    forcedProductRule?.mysterybox?.method === "cash" &&
+    forcedProductRule?.orderNumber &&
+    !forcedProductRule?.productId
+  ) {
+    // await User_Model.updateOne(
+    //   { userId },
+    //   { $inc: { userBalance: forcedProductRule.mysterybox.amount } },
+    // );
+    console.log("cash amount for userData updated");
+
+    const products = await ProductModel.aggregate([
+      { $match: { price: { $lte: user?.userSelectedPackage } } },
+      { $sample: { size: 1 } },
+    ]);
+
+    if (!products.length) {
+      return {
+        success: false,
+        message: "Insufficient balance to purchase any product",
+      };
+    }
+
+    product = products[0];
+  } else if (
+    !forcedProductRule?.mysterybox?.method &&
+    !forcedProductRule?.mysterybox?.amount &&
+    forcedProductRule?.productId &&
+    forcedProductRule?.orderNumber
+  ) {
     product = await ProductModel.findOne({
       productId: forcedProductRule.productId,
     });
@@ -555,6 +599,7 @@ const purchaseOrder = async (userId: number) => {
       outOfBalance = product?.price - user.userBalance;
     }
   } else {
+    console.log('hit the logic ------------------')
     const products = await ProductModel.aggregate([
       { $match: { price: { $lte: user?.userSelectedPackage } } },
       { $sample: { size: 1 } },
@@ -574,14 +619,16 @@ const purchaseOrder = async (userId: number) => {
 
   const productCommisionTenpercent =
     forcedProductRule?.mysterybox?.method === "cash"
-      ? Number(forcedProductRule?.mysterybox?.amount)
+      ? product.commission
       : forcedProductRule?.mysterybox?.method === "12x"
-        ? product?.price / 2
-        : (product?.price * 10) / 100;
+        ? (product.price * 48) / 100
+        : (product.price * 12.8) / 100;
 
   console.log("ten persent", productCommisionTenpercent);
 
   await User_Model.updateOne({ userId }, { $set: { outOfBalance } });
+
+  console.log('commision for all ', productCommisionTenpercent)
 
   return {
     orderNumber: currentOrderNumber,
@@ -629,13 +676,6 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
     if (!product) throw new Error("Product not found");
 
-    // if (user.userBalance < product.price)
-    //   return {
-    //     success: false,
-    //     message:
-    //       "Insufficient balance to purchase this product.please contact to admin supports",
-    //   };
-
     if (
       (user.userDiopsitType === "trial"
         ? user.trialRoundBalance
@@ -654,9 +694,18 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       (rule: any) => rule.orderNumber === currentOrderNumber,
     );
 
+    if (forcedProductRule?.mysterybox?.method === "cash") {
+      await User_Model.updateOne(
+        { userId },
+        { $inc: { userBalance: forcedProductRule.mysterybox.amount } },
+        { session },
+      );
+      console.log("cash amount for userData updated");
+    }
+
     const productCommisionTenpercent =
       forcedProductRule?.mysterybox?.method === "cash"
-        ? Number(forcedProductRule?.mysterybox?.amount)
+        ? product.commission
         : forcedProductRule?.mysterybox?.method === "12x"
           ? (product.price * 48) / 100
           : (product.price * 12.8) / 100;
