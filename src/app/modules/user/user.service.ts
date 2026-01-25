@@ -621,8 +621,8 @@ const purchaseOrder = async (userId: number) => {
     forcedProductRule?.mysterybox?.method === "cash"
       ? product.commission
       : forcedProductRule?.mysterybox?.method === "12x"
-        ? (product.price * 48) / 100
-        : (product.price * 12.8) / 100;
+        ? (product?.price * 48) / 100
+        : (product?.price * 12.8) / 100;
 
   console.log("ten persent", productCommisionTenpercent);
 
@@ -679,7 +679,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (
       (user.userDiopsitType === "trial"
         ? user.trialRoundBalance
-        : user.userBalance) < product.price
+        : user.userBalance) < product?.price
     ) {
       return {
         success: false,
@@ -707,8 +707,8 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
       forcedProductRule?.mysterybox?.method === "cash"
         ? product.commission
         : forcedProductRule?.mysterybox?.method === "12x"
-          ? (product.price * 48) / 100
-          : (product.price * 12.8) / 100;
+          ? (product?.price * 48) / 100
+          : (product?.price * 12.8) / 100;
 
     // console.log("ten persent", productCommisionTenpercent);
     // console.log("prodcut commision", product.commission);
