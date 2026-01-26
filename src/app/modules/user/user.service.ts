@@ -231,7 +231,6 @@ const decreaseUserBalance = async (id: number, amount: number) => {
     { userId: id },
     {
       userBalance: newBalance,
-      memberTotalRecharge: (user?.memberTotalRecharge || 0) - amount,
     },
     { new: true },
   );
@@ -599,7 +598,7 @@ const purchaseOrder = async (userId: number) => {
       outOfBalance = product?.price - user.userBalance;
     }
   } else {
-    console.log('hit the logic ------------------')
+    console.log("hit the logic ------------------");
     const products = await ProductModel.aggregate([
       { $match: { price: { $lte: user?.userSelectedPackage } } },
       { $sample: { size: 1 } },
@@ -628,7 +627,7 @@ const purchaseOrder = async (userId: number) => {
 
   await User_Model.updateOne({ userId }, { $set: { outOfBalance } });
 
-  console.log('commision for all ', productCommisionTenpercent)
+  console.log("commision for all ", productCommisionTenpercent);
 
   return {
     orderNumber: currentOrderNumber,
@@ -697,7 +696,12 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (forcedProductRule?.mysterybox?.method === "cash") {
       await User_Model.updateOne(
         { userId },
-        { $inc: { userBalance: forcedProductRule.mysterybox.amount } },
+        {
+          $inc: {
+            userBalance: forcedProductRule.mysterybox.amount,
+            dailyProfit: forcedProductRule.mysterybox.amount,
+          },
+        },
         { session },
       );
       console.log("cash amount for userData updated");
