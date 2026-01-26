@@ -162,7 +162,11 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
       { userId },
       {
         $set: {
-          userDiopsitType: "deposit",
+          userDiopsitType:
+            user.orderRound.round === "trial" &&
+            user?.orderRound.status === false
+              ? "diopsit"
+              : user.userDiopsitType,
           "orderRound.round": user.orderRound.round,
           "orderRound.status": false, //
           outOfBalance: newOutOfBalance,
@@ -537,7 +541,7 @@ const purchaseOrder = async (userId: number) => {
     return { success: false, message: "Insufficient order quantity" };
   }
 
-  if (user.quantityOfOrders <= 0) 
+  if (user.quantityOfOrders <= 0)
     return { success: false, message: "Insufficient order quantity" };
 
   // 🔢 Order number preview
