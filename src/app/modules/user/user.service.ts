@@ -534,10 +534,10 @@ const purchaseOrder = async (userId: number) => {
   if (!user.userSelectedPackage)
     return { success: false, message: "Please select a slot first" };
   if (!user.orderRound.status) {
-    return { success: false, message: "No active order round available" };
+    return { success: false, message: "Insufficient order quantity" };
   }
 
-  if (user.quantityOfOrders <= 0)
+  if (user.quantityOfOrders <= 0) 
     return { success: false, message: "Insufficient order quantity" };
 
   // 🔢 Order number preview
