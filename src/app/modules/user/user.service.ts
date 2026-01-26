@@ -269,10 +269,10 @@ const updateUserSelectedPackageAmount = async (
   // console.log("is blocked", isBlockedRound);
 
   if (
-    (user?.orderRound.round === "round_two" &&
+    (user?.orderRound.round === "trial" &&
       user?.orderRound.status === false &&
       user.quantityOfOrders > 0) ||
-    (user?.orderRound.round === "trial" &&
+    (user?.orderRound.round === "round_two" &&
       user?.orderRound.status === false &&
       user.quantityOfOrders > 0)
   ) {
