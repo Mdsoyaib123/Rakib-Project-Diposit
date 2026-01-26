@@ -702,7 +702,10 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
 
     if (!user) throw new Error("User not found");
     if (user.quantityOfOrders <= 0)
-      return { message: "Insufficient order quantity" };
+      return {
+        message:
+          "Insufficient order quantity . Please contact customer service",
+      };
 
     const currentOrderNumber = user.completedOrdersCount + 1;
 
@@ -743,7 +746,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         },
         { session },
       );
-      console.log("cash amount for userData updated");
+      // console.log("cash amount for userData updated");
     }
 
     const productCommisionTenpercent =
