@@ -708,7 +708,7 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     if (!product) throw new Error("Product not found");
 
     if (
-      (user.userDiopsitType === "trial"
+      (user.orderRound?.round === "trial"
         ? user.trialRoundBalance
         : user.userBalance) < product?.price
     ) {
@@ -789,7 +789,8 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
     const updatedUser = await User_Model.findOne({ userId }).session(session);
 
     if (
-      updatedUser?.userDiopsitType === "trial" &&
+      updatedUser?.orderRound?.round === "trial" &&
+      updatedUser?.orderRound?.status === false &&
       updatedUser?.quantityOfOrders === 0
     ) {
       await User_Model.updateOne(
