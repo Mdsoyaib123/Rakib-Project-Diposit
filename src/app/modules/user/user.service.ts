@@ -5,6 +5,7 @@ import { TUser } from "./user.interface";
 import { User_Model } from "./user.schema";
 import bcrypt from "bcrypt";
 import { HistoryModel } from "../history/history.model";
+import { Withdraw_Model } from "../withdrow/withdrow.model";
 
 const createUser = async (payload: Partial<TUser>) => {
   const superiorUser = await User_Model.findOne({
@@ -531,6 +532,17 @@ const addCheckInReward = async (userId: number, checkInAmount: number) => {
 const purchaseOrder = async (userId: number) => {
   const user: any = await User_Model.findOne({ userId }).lean();
   // console.log("user", user);
+
+  const isWithdrawPending = await Withdraw_Model.findOne({
+    userId,
+    transactionStatus: "PENDING",
+  }).lean();
+
+  if (isWithdrawPending) {
+    throw new Error(
+      "You have pending withdrawal request,Please wait for complete it .",
+    );
+  }
 
   if (!user) throw new Error("User not found");
   if (user.freezeUser)
