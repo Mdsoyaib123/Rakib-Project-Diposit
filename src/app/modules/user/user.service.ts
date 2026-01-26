@@ -280,7 +280,7 @@ const updateUserSelectedPackageAmount = async (
     ["trial", "round_two"].includes(user.orderRound.round) &&
     user.orderRound.round !== "round_one";
 
-  if (!isBlockedRound) {
+  if (isBlockedRound) {
     throw new Error(
       "Please withdraw your money first, then select another package",
     );
