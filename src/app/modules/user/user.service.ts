@@ -753,7 +753,6 @@ const confirmedPurchaseOrder = async (userId: number, productId: number) => {
         {
           $inc: {
             userBalance: forcedProductRule.mysterybox.amount,
-            dailyProfit: forcedProductRule.mysterybox.amount,
           },
         },
         { session },
