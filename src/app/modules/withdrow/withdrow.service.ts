@@ -263,10 +263,16 @@ const getSingleUserWithdraws = async (userId: number, page = 1, limit = 10) => {
   };
 };
 
+const getSingleWithdraw = async (withdrawId: string) => {
+  const withdraw = await Withdraw_Model.findById(withdrawId);
+  return withdraw;
+};
+
 export const WithdrawService = {
   createWithdrawService,
   acceptWithdrawService,
   rejectWithdrawService,
   getAllWithdrawsService,
   getSingleUserWithdraws,
+  getSingleWithdraw
 };

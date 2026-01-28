@@ -108,6 +108,24 @@ const getSingleUserWithdraws = async (req: Request, res: Response) => {
     });
   }
 };
+const getSingleWithdraw = async (req: Request, res: Response) => {
+  try {
+    const { withdrawId } = req.params;
+
+    const result = await WithdrawService.getSingleWithdraw(withdrawId);
+
+    res.status(200).json({
+      success: true,
+      message: "single withdraw retrieved successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const WithdrawController = {
   createWithdrawController,
@@ -115,4 +133,5 @@ export const WithdrawController = {
   rejectWithdraw,
   getAllWithdraws,
   getSingleUserWithdraws,
+  getSingleWithdraw,
 };
