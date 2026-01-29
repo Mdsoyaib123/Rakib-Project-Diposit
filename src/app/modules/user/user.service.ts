@@ -1040,6 +1040,150 @@ const addBonusReward = async (
   }
   return updateUser;
 };
+const getSuperiorUserRechargeAndWithdraw = async (
+  groupBy: "day" | "month" = "day",
+  filterSuperiorUserId?: string,
+) => {
+  // 1️⃣ Get all superior user IDs
+  let superiorUserIds: string[] = await User_Model.distinct("superiorUserId", {
+    superiorUserId: { $ne: null },
+  });
+
+  if (filterSuperiorUserId) {
+    superiorUserIds = superiorUserIds.filter(
+      (id) => id === filterSuperiorUserId,
+    );
+    if (superiorUserIds.length === 0) return []; // no matching superior user
+  }
+
+  // 2️⃣ Recharge aggregation
+  const rechargeAgg = await HistoryModel.aggregate([
+    { $match: { historyType: "recharge", notes: { $exists: false } } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+    ...(filterSuperiorUserId
+      ? [{ $match: { "user.superiorUserId": filterSuperiorUserId } }]
+      : []),
+    {
+      $group: {
+        _id: {
+          superiorUserId: "$user.superiorUserId",
+          period:
+            groupBy === "month"
+              ? { $dateToString: { format: "%Y-%m", date: "$time" } }
+              : { $dateToString: { format: "%Y-%m-%d", date: "$time" } },
+        },
+        totalRecharge: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  // 3️⃣ Withdraw aggregation
+  const withdrawAgg = await Withdraw_Model.aggregate([
+    { $match: { transactionStatus: "APPROVED" } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "userId",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+    ...(filterSuperiorUserId
+      ? [{ $match: { "user.superiorUserId": filterSuperiorUserId } }]
+      : []),
+    {
+      $group: {
+        _id: {
+          superiorUserId: "$user.superiorUserId",
+          period:
+            groupBy === "month"
+              ? { $dateToString: { format: "%Y-%m", date: "$applicationTime" } }
+              : {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: "$applicationTime",
+                  },
+                },
+        },
+        totalWithdraw: { $sum: "$withdrawalAmount" },
+      },
+    },
+  ]);
+
+  // 4️⃣ Get all periods from recharge/withdraw (or use current period if empty)
+  const allPeriods = new Set<string>();
+  rechargeAgg.forEach((r) => allPeriods.add(r._id.period));
+  withdrawAgg.forEach((w) => allPeriods.add(w._id.period));
+
+  if (allPeriods.size === 0) {
+    // No activity at all, show current day/month
+    const now = new Date();
+    const defaultPeriod =
+      groupBy === "month"
+        ? now.toISOString().slice(0, 7)
+        : now.toISOString().slice(0, 10);
+    allPeriods.add(defaultPeriod);
+  }
+
+  // 5️⃣ Build the report with **all superior users & periods**
+  const report: any[] = [];
+
+  superiorUserIds.forEach((superiorId) => {
+    allPeriods.forEach((period) => {
+      const recharge = rechargeAgg.find(
+        (r) => r._id.superiorUserId === superiorId && r._id.period === period,
+      );
+      const withdraw = withdrawAgg.find(
+        (w) => w._id.superiorUserId === superiorId && w._id.period === period,
+      );
+
+      report.push({
+        superiorUserId: superiorId,
+        period,
+        totalRecharge: recharge ? recharge.totalRecharge : 0,
+        totalWithdraw: withdraw ? withdraw.totalWithdraw : 0,
+      });
+    });
+  });
+
+  // 6️⃣ Sort
+  report.sort(
+    (a, b) =>
+      a.superiorUserId.localeCompare(b.superiorUserId) ||
+      new Date(a.period).getTime() - new Date(b.period).getTime(),
+  );
+
+  return report;
+};
+
+const getPlatformRechargeAndWithdrawFromSuperiorData = async () => {
+  // 1️⃣ Total recharge (exclude notes)
+  const rechargeAgg = await HistoryModel.aggregate([
+    { $match: { historyType: "recharge", notes: { $exists: false } } },
+    { $group: { _id: null, totalRecharge: { $sum: "$amount" } } },
+  ]);
+
+  // 2️⃣ Total withdraw (only APPROVED)
+  const withdrawAgg = await Withdraw_Model.aggregate([
+    { $match: { transactionStatus: "APPROVED" } },
+    { $group: { _id: null, totalWithdraw: { $sum: "$withdrawalAmount" } } },
+  ]);
+
+  return {
+    totalRecharge: rechargeAgg[0]?.totalRecharge || 0,
+    totalWithdraw: withdrawAgg[0]?.totalWithdraw || 0,
+  };
+};
+
 
 export const user_services = {
   createUser,
@@ -1066,5 +1210,7 @@ export const user_services = {
   udpateFreezeWithdraw,
   getUserWithdrawAddress,
   updateWithdrawPassword,
-  addBonusReward
+  addBonusReward,
+  getSuperiorUserRechargeAndWithdraw,
+  getPlatformRechargeAndWithdrawFromSuperiorData,
 };
