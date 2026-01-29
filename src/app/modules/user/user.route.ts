@@ -64,5 +64,8 @@ router.patch(
   user_controllers.updateWithdrawPassword,
 );
 router.patch("/add-bonus-reward/:userId", user_controllers.addBonusReward);
+router.get("/add-bonus-reward/:userId", user_controllers.addBonusReward);
+router.get("/get-superior-user-recharge-withdraw", user_controllers.getSuperiorUserRechargeAndWithdraw);
+router.get("/get-platform-recharge-withdraw", user_controllers.getPlatformRechargeAndWithdrawFromSuperiorData);
 
 export const userRoute = router;

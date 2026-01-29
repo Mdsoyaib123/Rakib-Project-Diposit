@@ -492,6 +492,52 @@ const addBonusReward = async (req: Request, res: Response) => {
     });
   }
 };
+const getSuperiorUserRechargeAndWithdraw = async (
+  req: Request,
+  res: Response,
+) => {
+  const { groupBy, filterSuperiorUserId } = req.query;
+
+  try {
+    const result = await user_services.getSuperiorUserRechargeAndWithdraw(
+      groupBy as "day" | "month",
+      filterSuperiorUserId as string,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `get superior user recharge and withdraw successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const getPlatformRechargeAndWithdrawFromSuperiorData = async (
+  req: Request,
+  res: Response,
+) => {
+  const { groupBy, filterSuperiorUserId } = req.query;
+
+  try {
+    const result =
+      await user_services.getPlatformRechargeAndWithdrawFromSuperiorData();
+
+    res.status(200).json({
+      success: true,
+      message: `get platform recharge and withdraw successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const user_controllers = {
   createUser,
@@ -518,4 +564,6 @@ export const user_controllers = {
   getUserWithdrawAddress,
   updateWithdrawPassword,
   addBonusReward,
+  getSuperiorUserRechargeAndWithdraw,
+  getPlatformRechargeAndWithdrawFromSuperiorData
 };
