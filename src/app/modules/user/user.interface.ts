@@ -40,7 +40,7 @@ export type TUser = {
   memberTotalWithdrawal?: number;
   userOrderFreezingAmount?: number;
   amountFrozedInWithdrawal?: number;
-  whetherOnline?: boolean;
+  isOnline?: boolean;
   mobilePhoneAreaCode?: string;
   lastLoginIp: string;
   lastLoginTime: Date;

@@ -122,7 +122,7 @@ const userSchema = new Schema<TUser>(
 
     userOrderFreezingAmount: { type: Number, default: 0 },
     amountFrozedInWithdrawal: { type: Number, default: 0 },
-    whetherOnline: { type: Boolean, default: true },
+    isOnline: { type: Boolean, default: false },
     mobilePhoneAreaCode: { type: String },
 
     lastLoginIp: { type: String },
