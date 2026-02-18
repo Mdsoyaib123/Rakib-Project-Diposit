@@ -356,7 +356,7 @@ const updateWithdrawalAddress = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `withdrawal address updated successfully`,
+      message: `Cash Out address updated successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -418,7 +418,7 @@ const udpateFreezeWithdraw = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `withdraw freeze updated successfully`,
+      message: `Cash out freeze updated successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -438,7 +438,7 @@ const getUserWithdrawAddress = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `get user withdrawal address successfully`,
+      message: `get user Cash Out address successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -459,7 +459,7 @@ const updateWithdrawPassword = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `withdraw password updated successfully`,
+      message: `Cash Out password updated successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -506,7 +506,7 @@ const getSuperiorUserRechargeAndWithdraw = async (
 
     res.status(200).json({
       success: true,
-      message: `get superior user recharge and withdraw successfully`,
+      message: `get superior user recharge and Cash Out successfully`,
       data: result,
     });
   } catch (error: any) {
@@ -528,7 +528,7 @@ const getPlatformRechargeAndWithdrawFromSuperiorData = async (
 
     res.status(200).json({
       success: true,
-      message: `get platform recharge and withdraw successfully`,
+      message: `get platform recharge and Cash Out successfully`,
       data: result,
     });
   } catch (error: any) {

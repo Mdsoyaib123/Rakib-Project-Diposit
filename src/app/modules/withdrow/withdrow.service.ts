@@ -13,6 +13,17 @@ type CreateWithdrawPayload = {
 const createWithdrawService = async (payload: CreateWithdrawPayload) => {
   const { userId, amount, withdrawPassword } = payload;
 
+  const pendingWithdraw = await Withdraw_Model.findOne({
+    userId,
+    transactionStatus: "PENDING",
+  });
+
+  if (pendingWithdraw) {
+    throw new Error(
+      "You have a pending Cash Out request, Wait for complete it ",
+    );
+  }
+
   const user = await User_Model.findOne({ userId });
 
   if (!user?.withdrawPassword) {
@@ -272,7 +283,6 @@ const getAllWithdrawsService = async (
     },
   };
 };
-
 
 const getSingleUserWithdraws = async (userId: number, page = 1, limit = 10) => {
   const skip = (page - 1) * limit;
