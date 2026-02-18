@@ -7,7 +7,7 @@ const createWithdrawController = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: "Withdrawal request submitted",
+      message: "Cash Out request submitted",
       data: result,
     });
   } catch (error: any) {
@@ -26,7 +26,7 @@ const acceptWithdraw = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Withdrawal approved successfully",
+      message: "Cash Out approved successfully",
       data: result,
     });
   } catch (error: any) {
@@ -49,7 +49,7 @@ const rejectWithdraw = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Withdrawal rejected successfully",
+      message: "Cash Out rejected successfully",
       data: result,
     });
   } catch (error: any) {
