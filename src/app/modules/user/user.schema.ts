@@ -193,4 +193,30 @@ const userSchema = new Schema<TUser>(
   { timestamps: true },
 );
 
+userSchema.set("toJSON", {
+  transform: function (doc, ret: TUser & { _id: any; __v: number }) {
+    const amountFields: (keyof TUser)[] = [
+      "userBalance",
+      "trialRoundBalance",
+      "dailyProfit",
+      "memberTotalRecharge",
+      "memberTotalWithdrawal",
+      "userOrderFreezingAmount",
+      "amountFrozedInWithdrawal",
+      "mysteryReward",
+      "outOfBalance",
+    ];
+
+    amountFields.forEach((field) => {
+      const value = ret[field];
+
+      if (typeof value === "number") {
+        (ret[field] as unknown) = Number(value).toLocaleString();
+      }
+    });
+
+    return ret;
+  },
+});
+
 export const User_Model = mongoose.model<TUser>("User", userSchema);

@@ -77,7 +77,7 @@ const getAllWithdraws = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Withdraws retrieved successfully",
+      message: "Cash Out retrieved successfully",
       data: result.data,
     });
   } catch (error: any) {
@@ -102,7 +102,7 @@ const getSingleUserWithdraws = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "User withdraws retrieved successfully",
+      message: "User Cash Out retrieved successfully",
       data: result.data,
     });
   } catch (error: any) {
@@ -120,7 +120,7 @@ const getSingleWithdraw = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "single withdraw retrieved successfully",
+      message: "single Cash Out retrieved successfully",
       data: result,
     });
   } catch (error: any) {
