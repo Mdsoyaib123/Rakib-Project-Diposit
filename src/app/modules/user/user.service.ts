@@ -287,7 +287,7 @@ const updateUserSelectedPackageAmount = async (
 
   if (isBlockedRound) {
     throw new Error(
-      "Please withdraw your money first, then select another package",
+      "Please Cash Out your money first, then select another package",
     );
   }
 
@@ -540,7 +540,7 @@ const purchaseOrder = async (userId: number) => {
 
   if (isWithdrawPending) {
     throw new Error(
-      "You have pending withdrawal request,Please wait for complete it .",
+      "You have pending Cash Out request,Please wait for complete it .",
     );
   }
 
@@ -1013,7 +1013,7 @@ const updateWithdrawPassword = async (userId: number, payload: string) => {
   }
 
   if (!payload) {
-    throw new Error("Withdrawal password is required");
+    throw new Error("Cash Out password is required");
   }
 
   // 🔐 hash withdrawal password
