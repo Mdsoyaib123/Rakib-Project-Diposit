@@ -539,6 +539,29 @@ const getPlatformRechargeAndWithdrawFromSuperiorData = async (
   }
 };
 
+const updatePasswordFromAdmin = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { newPassword } = req.body;
+
+    const result = await user_services.updatePasswordFromAdmin(
+      Number(userId) as unknown as number,
+      newPassword as string,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `password updated successfully`,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const user_controllers = {
   createUser,
   getAllUsers,
@@ -566,4 +589,5 @@ export const user_controllers = {
   addBonusReward,
   getSuperiorUserRechargeAndWithdraw,
   getPlatformRechargeAndWithdrawFromSuperiorData,
+  updatePasswordFromAdmin
 };
