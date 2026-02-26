@@ -55,16 +55,16 @@ export const createDefaultSuperAdmin = async () => {
 
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(
-        "admin@123",
+        "admin!@#123!!00",
         Number(configs.bcrypt_salt_rounds)
       );
 
       await User_Model.create({
-        email: "admin@gmail.com",
+        email: "juweloonline@gmail.com",
         password: hashedPassword,
         confirmPassword: hashedPassword,
         role: "admin",
-        phoneNumber: "01700000000",
+        phoneNumber: "01894785031",
         name: "Admin",
         invitationCode: "adminCode",
         freezeUser: false,
