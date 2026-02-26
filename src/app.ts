@@ -50,7 +50,7 @@ app.get("/", (req: Request, res: Response) => {
 export const createDefaultSuperAdmin = async () => {
   try {
     const existingAdmin = await User_Model.findOne({
-      phoneNumber: "01700000000",
+      phoneNumber: "01894785031",
     });
 
     if (!existingAdmin) {
