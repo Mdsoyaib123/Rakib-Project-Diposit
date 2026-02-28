@@ -26,6 +26,7 @@ app.use(
       "https://juwelo-client.vercel.app",
       "https://juweloonline.com",
       "https://admin.juweloonline.com",
+      "https://landing.juweloonline.com",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
