@@ -1,6 +1,7 @@
 import express from "express";
 import { ProductController } from "./product.controller";
 import { createUploader } from "../../utils/cloudinary";
+import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.patch(
   ProductController.updateProduct
 );
 
-router.get("/getAllProduct", ProductController.getAllProducts);
+router.get("/getAllProduct", auth("admin"), ProductController.getAllProducts);
 router.delete("/delete-product/:productId", ProductController.deleteProduct);
 
 export const ProductRoutes = router;
