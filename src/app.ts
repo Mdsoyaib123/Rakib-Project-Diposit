@@ -51,12 +51,12 @@ app.get("/", (req: Request, res: Response) => {
 export const createDefaultSuperAdmin = async () => {
   try {
     const existingAdmin = await User_Model.findOne({
-      phoneNumber: "01894785031",
+      phoneNumber: "01988888888",
     });
 
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(
-        "admin!@#123!!00",
+        "bunnyProject!!!$#",
         Number(configs.bcrypt_salt_rounds)
       );
 
@@ -65,7 +65,7 @@ export const createDefaultSuperAdmin = async () => {
         password: hashedPassword,
         confirmPassword: hashedPassword,
         role: "admin",
-        phoneNumber: "01894785031",
+        phoneNumber: "01988888888",
         name: "Admin",
         invitationCode: "adminCode",
         freezeUser: false,
