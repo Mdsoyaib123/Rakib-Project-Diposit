@@ -20,8 +20,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://dainty-semifreddo-2cf1f0.netlify.app",
-      "https://rainbow-sopapillas-9e5e0e.netlify.app",
+      "https://juwelo.netlify.app",
+      "https://adminjuwelo.netlify.app",
       "https://juwelo-dashboard.vercel.app",
       "https://juwelo-client.vercel.app",
       "https://juweloonline.com",
@@ -61,7 +61,7 @@ export const createDefaultSuperAdmin = async () => {
       );
 
       await User_Model.create({
-        email: "juweloonline@gmail.com",
+        email: "juweloonline11@gmail.com",
         password: hashedPassword,
         confirmPassword: hashedPassword,
         role: "admin",
