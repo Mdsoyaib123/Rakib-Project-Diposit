@@ -27,6 +27,8 @@ app.use(
       "https://juweloonline.com",
       "https://admin.juweloonline.com",
       "https://landing.juweloonline.com",
+      "https://juwelo1.netlify.app",
+      "https://juwelo-dashboard1.netlify.app",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
