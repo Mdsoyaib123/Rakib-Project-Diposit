@@ -74,6 +74,7 @@ export const createDefaultSuperAdmin = async () => {
       });
       console.log("✅ Default Admin created.");
     } else {
+
       console.log("ℹ️ Admin already exists.");
     }
   } catch (error) {
