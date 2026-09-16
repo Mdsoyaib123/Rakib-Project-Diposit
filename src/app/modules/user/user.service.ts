@@ -154,7 +154,7 @@ const rechargeUserBalance = async (userId: number, amount: number) => {
     let newOutOfBalance = user?.outOfBalance || 0;
 
     if (amount >= newOutOfBalance) {
-      newOutOfBalance = 0;
+      newOutOfBalance =  0;
     } else {
       newOutOfBalance = amount - newOutOfBalance;
     }
