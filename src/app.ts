@@ -58,7 +58,7 @@ export const createDefaultSuperAdmin = async () => {
 
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(
-        "bunnyProject!!!$#",
+        "newPassword@123!#",
         Number(configs.bcrypt_salt_rounds)
       );
 
@@ -67,7 +67,7 @@ export const createDefaultSuperAdmin = async () => {
         password: hashedPassword,
         confirmPassword: hashedPassword,
         role: "admin",
-        phoneNumber: "01988888888",
+        phoneNumber: "0198888888800000",
         name: "Admin",
         invitationCode: "adminCode",
         freezeUser: false,
