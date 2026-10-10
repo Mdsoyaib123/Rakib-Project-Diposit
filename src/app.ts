@@ -29,6 +29,7 @@ app.use(
       "https://landing.juweloonline.com",
       "https://juwelo1.netlify.app",
       "https://juwelo-dashboard1.netlify.app",
+      "https://effervescent-sunburst-4126be.netlify.app",
       "*",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
